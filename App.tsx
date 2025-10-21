@@ -3,6 +3,7 @@ import Header from './components/Header';
 import TravelCard from './components/TravelCard';
 import LoadingSpinner from './components/LoadingSpinner';
 import AddTripModal from './components/AddTripModal';
+import EditTripModal from './components/EditTripModal';
 import { Trip, TripStatus } from './types';
 import { supabase } from './services/supabaseClient';
 
@@ -21,6 +22,8 @@ const App: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [updatingTripId, setUpdatingTripId] = useState<number | null>(null);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
+  const [editingTrip, setEditingTrip] = useState<Trip | null>(null);
   const [isSaving, setIsSaving] = useState<boolean>(false);
 
   const fetchTrips = useCallback(async () => {
@@ -108,6 +111,42 @@ const App: React.FC = () => {
       setIsSaving(false);
     }
   };
+  
+  const handleOpenEditModal = (trip: Trip) => {
+    setEditingTrip(trip);
+    setIsEditModalOpen(true);
+  };
+
+  const handleCloseEditModal = () => {
+    setEditingTrip(null);
+    setIsEditModalOpen(false);
+  };
+
+  const handleUpdateTrip = async (updatedTrip: Trip) => {
+    setIsSaving(true);
+    try {
+        const { id, created_at, ...updateData } = updatedTrip;
+        const { error: dbError } = await supabase
+            .from('despesas')
+            .update(updateData)
+            .eq('id', updatedTrip.id);
+        
+        if (dbError) {
+            throw dbError;
+        }
+
+        handleCloseEditModal();
+        await fetchTrips();
+
+    } catch (err: any) {
+      const specificMessage = err.message || 'Erro desconhecido.';
+      console.error('Falha ao atualizar a viagem:', err);
+      alert(`Não foi possível atualizar a viagem. Motivo: ${specificMessage}\n\nVerifique se as permissões de escrita (RLS) estão configuradas corretamente.`);
+    } finally {
+        setIsSaving(false);
+    }
+  };
+
 
   const renderContent = () => {
     if (loading) {
@@ -140,6 +179,7 @@ const App: React.FC = () => {
             trip={trip} 
             onUpdateStatus={handleUpdateStatus}
             isUpdating={updatingTripId === trip.id}
+            onEdit={handleOpenEditModal}
           />
         ))}
       </div>
@@ -166,6 +206,13 @@ const App: React.FC = () => {
         onClose={() => setIsModalOpen(false)}
         onSave={handleSaveTrip}
         isSaving={isSaving}
+      />
+      <EditTripModal 
+        isOpen={isEditModalOpen}
+        onClose={handleCloseEditModal}
+        onSave={handleUpdateTrip}
+        isSaving={isSaving}
+        initialData={editingTrip}
       />
     </div>
   );

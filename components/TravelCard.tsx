@@ -5,6 +5,7 @@ interface TravelCardProps {
   trip: Trip;
   onUpdateStatus: (id: number, newStatus: TripStatus) => void;
   isUpdating: boolean;
+  onEdit: (trip: Trip) => void;
 }
 
 const CalendarIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
@@ -19,8 +20,11 @@ const XCircleIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
     <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
 );
 
+const PencilIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+    <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path><path d="m15 5 4 4"></path></svg>
+);
 
-const TravelCard: React.FC<TravelCardProps> = ({ trip, onUpdateStatus, isUpdating }) => {
+const TravelCard: React.FC<TravelCardProps> = ({ trip, onUpdateStatus, isUpdating, onEdit }) => {
   const { id, origem, destino, data_ida, data_volta, companhia, valor, status } = trip;
 
   const formatDate = (dateString: string | null) => {
@@ -60,50 +64,59 @@ const TravelCard: React.FC<TravelCardProps> = ({ trip, onUpdateStatus, isUpdatin
         </div>
         <div className="mt-6 flex flex-col sm:flex-row sm:justify-between sm:items-center">
           <p className="text-2xl font-light text-sky-600">{formatCurrency(valor)}</p>
-          {status === TripStatus.Pendente && (
+          <div className="flex items-center space-x-2">
             <button
-              onClick={() => onUpdateStatus(id, TripStatus.Comprado)}
-              disabled={isUpdating}
-              className="mt-4 sm:mt-0 flex items-center justify-center px-4 py-2 bg-emerald-500 text-white font-semibold rounded-lg shadow-md hover:bg-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:ring-opacity-75 transition-colors disabled:bg-emerald-300 disabled:cursor-not-allowed"
+                onClick={() => onEdit(trip)}
+                aria-label="Editar Viagem"
+                className="mt-4 sm:mt-0 p-2 text-slate-500 hover:text-sky-600 hover:bg-slate-100 rounded-full focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-opacity-75 transition-colors"
             >
-              {isUpdating ? (
-                <>
-                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Atualizando...
-                </>
-              ) : (
-                <>
-                  <CheckCircleIcon className="h-5 w-5 mr-2" />
-                  Marcar como Comprado
-                </>
-              )}
+                <PencilIcon className="h-5 w-5" />
             </button>
-          )}
-          {status === TripStatus.Comprado && (
-            <button
-              onClick={() => onUpdateStatus(id, TripStatus.Pendente)}
-              disabled={isUpdating}
-              className="mt-4 sm:mt-0 flex items-center justify-center px-4 py-2 bg-amber-500 text-white font-semibold rounded-lg shadow-md hover:bg-amber-600 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-opacity-75 transition-colors disabled:bg-amber-300 disabled:cursor-not-allowed"
-            >
-              {isUpdating ? (
-                <>
-                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Revertendo...
-                </>
-              ) : (
-                <>
-                  <XCircleIcon className="h-5 w-5 mr-2" />
-                  Marcar como Pendente
-                </>
-              )}
-            </button>
-          )}
+            {status === TripStatus.Pendente && (
+              <button
+                onClick={() => onUpdateStatus(id, TripStatus.Comprado)}
+                disabled={isUpdating}
+                className="mt-4 sm:mt-0 flex items-center justify-center px-4 py-2 bg-emerald-500 text-white font-semibold rounded-lg shadow-md hover:bg-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:ring-opacity-75 transition-colors disabled:bg-emerald-300 disabled:cursor-not-allowed"
+              >
+                {isUpdating ? (
+                  <>
+                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Atualizando...
+                  </>
+                ) : (
+                  <>
+                    <CheckCircleIcon className="h-5 w-5 mr-2" />
+                    Marcar como Comprado
+                  </>
+                )}
+              </button>
+            )}
+            {status === TripStatus.Comprado && (
+              <button
+                onClick={() => onUpdateStatus(id, TripStatus.Pendente)}
+                disabled={isUpdating}
+                className="mt-4 sm:mt-0 flex items-center justify-center px-4 py-2 bg-amber-500 text-white font-semibold rounded-lg shadow-md hover:bg-amber-600 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-opacity-75 transition-colors disabled:bg-amber-300 disabled:cursor-not-allowed"
+              >
+                {isUpdating ? (
+                  <>
+                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Revertendo...
+                  </>
+                ) : (
+                  <>
+                    <XCircleIcon className="h-5 w-5 mr-2" />
+                    Marcar como Pendente
+                  </>
+                )}
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </div>
