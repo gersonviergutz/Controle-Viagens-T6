@@ -21,6 +21,7 @@ const App: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [updatingTripId, setUpdatingTripId] = useState<number | null>(null);
+  const [deletingTripId, setDeletingTripId] = useState<number | null>(null);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
   const [editingTrip, setEditingTrip] = useState<Trip | null>(null);
@@ -146,6 +147,39 @@ const App: React.FC = () => {
         setIsSaving(false);
     }
   };
+  
+  const handleDeleteTrip = async (tripId: number) => {
+    if (!window.confirm('Tem certeza de que deseja excluir esta viagem? Esta ação não pode ser desfeita.')) {
+        return;
+    }
+
+    setDeletingTripId(tripId);
+
+    try {
+        const { data, error: dbError } = await supabase
+            .from('despesas')
+            .delete()
+            .eq('id', tripId)
+            .select();
+
+        if (dbError) {
+            throw dbError;
+        }
+
+        if (!data || data.length === 0) {
+            throw new Error("Nenhuma viagem foi excluída. Verifique suas permissões (RLS).");
+        }
+
+        setTrips(prevTrips => prevTrips.filter(trip => trip.id !== tripId));
+
+    } catch (err: any) {
+        const specificMessage = err.message || 'Erro desconhecido.';
+        console.error('Falha ao excluir a viagem:', err);
+        alert(`Não foi possível excluir a viagem. Motivo: ${specificMessage}\n\nVerifique suas permissões de exclusão (RLS).`);
+    } finally {
+        setDeletingTripId(null);
+    }
+  };
 
 
   const renderContent = () => {
@@ -180,6 +214,8 @@ const App: React.FC = () => {
             onUpdateStatus={handleUpdateStatus}
             isUpdating={updatingTripId === trip.id}
             onEdit={handleOpenEditModal}
+            onDelete={handleDeleteTrip}
+            isDeleting={deletingTripId === trip.id}
           />
         ))}
       </div>
