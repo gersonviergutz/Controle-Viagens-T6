@@ -14,4 +14,5 @@ export interface Trip {
   valor: number | null;
   status: TripStatus | null;
   observacao: string | null;
+  user_id?: string; // Add user_id field to match database schema
 }
