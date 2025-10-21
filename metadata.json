@@ -1,0 +1,5 @@
+{
+  "name": "Gerenciador de Viagens Supabase",
+  "description": "Uma aplicação web para consultar e gerenciar informações de viagens de um banco de dados Supabase, permitindo a alteração de status das viagens.",
+  "requestFramePermissions": []
+}
