@@ -1,3 +1,24 @@
+/**
+ * Componente Principal da Aplicação
+ *
+ * Este é o componente raiz que configura:
+ * - Roteamento com React Router
+ * - Contexto de autenticação global
+ * - Proteção de rotas públicas e privadas
+ *
+ * Estrutura de Rotas:
+ * - Rotas públicas: /login, /signup, /forgot-password, /reset-password
+ *   - Redirecionam para /dashboard se o usuário já estiver autenticado
+ *
+ * - Rotas protegidas: /dashboard
+ *   - Requerem autenticação para acesso
+ *   - Redirecionam para /login se o usuário não estiver autenticado
+ *
+ * - Rotas especiais:
+ *   - / -> redireciona para /dashboard
+ *   - * (catch-all) -> redireciona para /dashboard
+ */
+
 import React from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext'
@@ -8,6 +29,10 @@ import { ForgotPasswordPage } from './pages/ForgotPasswordPage'
 import { ResetPasswordPage } from './pages/ResetPasswordPage'
 import { DashboardPage } from './pages/DashboardPage'
 
+/**
+ * Componente App
+ * Ponto de entrada principal da aplicação
+ */
 const App: React.FC = () => {
   return (
     <AuthProvider>
